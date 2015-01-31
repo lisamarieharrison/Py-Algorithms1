@@ -1,58 +1,74 @@
-import numpy
+import numpy as np
 import random
 
 N = 10
 prob = 0.5
 percolates = False
 open = 0
-id = range(0, N**2 - 1)
+id = range(0, N**2 + 2) #0 = false top and N**2 + 1 == false bottom
+sz = np.ones((N**2 + 2)) #tree size starts at 1
+is_open = range(1, N**2 + 1)
+
+def root(n):
+    """Finds the root of a node
+    :rtype: int
+    """
+    while n != id[n]:
+        n = id[n]
+    return n
 
 def union(x, y):
-    '''Creates a union between two nodes'''
-    while x != id[x]:
-        x = id[x]
-        return x
-    id[y] == x
+    """Creates a union between two nodes
+    :rtype: nothing
+    """
+    x_root = root(x)
+    y_root = root(y)
+    if y_root != x_root:
+        id[y_root] = x
+        sz[x] += sz[y]
 
 def connected(x, y):
-    '''Checks whether two nodes are connected and returns Boolean'''
-    while x != id[x]:
-        x = id[x]
-    while numpy != id[y]:
-        y = id[y]
-    return x == y
+    """Checks whether two nodes are connected
+    :rtype: bool
+    """
+    x_root = root(x)
+    y_root = root(y)
+    return x_root == y_root
 
-'''make a false top and bottom node'''
-top = N**2
-bottom = N**2 + 1
-id.append(top)
-id.append(bottom)
+
+#join top and bottom to top and bottom rows
 for i in range(1, N):
-    union(top, i)
-for i in range(N**2 - N, N**2):
-    union(bottom, i)
+    id[i] = 0
+for i in range(N**2 - N + 1, N**2 + 1):
+    id[i] = N**2 + 1
 
-'''site is blocked if cell == 0'''
-system = numpy.zeros((N, N))
+#creat board. site is blocked if cell == 0
+board = np.zeros((N**2 + 2))
 
 
 while percolates == False:
 
-    '''randomly select a cell and open'''
-    i = random.randint(1, N**2)
-    row = (x - N)/N + 1
-    column = x - row*N - 1
-    system[row, column] = 1
-
-    '''connect to neighbours'''
-    neighb = [i - 1, i + 1, i - N, i + N]
-    for j in neighb:
-        union(i, j)
+    #randomly select a cell and open
+    if is_open:
+        i = random.choice(is_open)
+        is_open.remove(i)
+    board[i] = 1
     open += 1
 
-    '''check if percolates'''
-    if connected(top, bottom):
+    #connect to neighbours
+    neighb = [i - 10, i + 10]
+    if (i - 1) % 10 != 0:
+        neighb.append(i - 1)
+    if i % 10 != 0:
+        neighb.append(i + 1)
+    for j in neighb:
+        if j in range(1, N**2 + 1):
+            union(i, j)
+    print open
+    #check if percolates
+    if connected(0, N**2 + 1):
         percolates = True
+    print percolates
 
 
-print open/(N**2)
+#print open/(N**2)
