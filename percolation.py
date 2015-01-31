@@ -1,8 +1,7 @@
 import numpy as np
 import random
 
-N = 10
-prob = 0.5
+N = 20
 percolates = False
 open = 0
 id = range(0, N**2 + 2) #0 = false top and N**2 + 1 == false bottom
@@ -56,19 +55,23 @@ while percolates == False:
     open += 1
 
     #connect to neighbours
-    neighb = [i - 10, i + 10]
-    if (i - 1) % 10 != 0:
+    neighb = [i - N, i + N]
+    if (i - 1) % N != 0:
         neighb.append(i - 1)
-    if i % 10 != 0:
+    if i % N != 0:
         neighb.append(i + 1)
     for j in neighb:
         if j in range(1, N**2 + 1):
-            union(i, j)
-    print open
+            if board[j] == 1:
+                union(i, j)
     #check if percolates
     if connected(0, N**2 + 1):
         percolates = True
-    print percolates
 
+print float(open) / N**2
 
-#print open/(N**2)
+'''
+#optionally print out the board
+for i in range(1, N**2 - (N - 2), N):
+    print board[range(i, i + N)]
+'''
