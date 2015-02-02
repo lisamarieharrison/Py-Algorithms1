@@ -1,77 +1,146 @@
 import numpy as np
+from scipy import stats
 import random
+import sys
+import time
 
-N = 20
-percolates = False
-open = 0
-id = range(0, N**2 + 2) #0 = false top and N**2 + 1 == false bottom
-sz = np.ones((N**2 + 2)) #tree size starts at 1
-is_open = range(1, N**2 + 1)
+startTime = time.clock()
 
-def root(n):
-    """Finds the root of a node
-    :rtype: int
-    """
-    while n != id[n]:
-        n = id[n]
-    return n
+class Percolation():
 
-def union(x, y):
-    """Creates a union between two nodes
-    :rtype: nothing
-    """
-    x_root = root(x)
-    y_root = root(y)
-    if y_root != x_root:
-        id[y_root] = x
-        sz[x] += sz[y]
+    def __init__(self, N):
+        self.N = N
+        self.open = 0
+        self.percolates = False #does the system percolate?
+        self.sz = np.ones((self.N**2 + 2)) #tree size starts at 1 for all nodes
+        self.id = range(0, N**2 + 2) #0 = false top and N**2 + 1 == false bottom
+        self.is_open = range(1, N**2 + 1) #array of nodes that are closed
 
-def connected(x, y):
-    """Checks whether two nodes are connected
-    :rtype: bool
-    """
-    x_root = root(x)
-    y_root = root(y)
-    return x_root == y_root
+    def percolation(self, N):
+        '''
+        Creates an N*N board
+        :param N: Dimension of square board
+        :return: board
+        '''
+
+        self.board = [False] * (N**2 + 2) #create boolean board of N**2 values + false top and bottom
+
+        #join false top and bottom to first and last rows
+        for i in range(1, N):
+            self.id[i] = 0
+        for i in range(N**2 - N + 1, N**2 + 1):
+            self.id[i] = N**2 + 1
+
+    def root(self, n):
+        '''
+        Finds the root of a node
+        :param n: Node number
+        :return: int
+        '''
+        while n != self.id[n]:
+            self.id[n] = self.id[self.id[n]] #path compression
+            n = self.id[n]
+        return n
+
+    def connected(self, x, y):
+        '''
+        :param x: First node
+        :param y: Second node
+        :return: bool
+        '''
+        x_root = self.root(x)
+        y_root = self.root(y)
+        return x_root == y_root
+
+    def union(self, x, y):
+        '''
+        :param x: First node
+        :param y: Second node
+        :return: nothing
+        '''
+        x_root = self.root(x)
+        y_root = self.root(y)
+        if y_root != x_root:
+            #if roots are not the same, move smaller tree to larger tree
+            if self.sz[x] <= self.sz[y]:
+                self.id[x_root] = y
+                self.sz[y] += self.sz[x]
+            else:
+                self.id[y_root] = x
+                self.sz[x] += self.sz[y]
 
 
-#join top and bottom to top and bottom rows
-for i in range(1, N):
-    id[i] = 0
-for i in range(N**2 - N + 1, N**2 + 1):
-    id[i] = N**2 + 1
+def runPercolation(N):
+    '''
+    Runs a single percolation problem
+    :param N: Board size
+    :return: int giving the percolation threshold
+    '''
+    run = Percolation(N)
+    init = run.percolation(N)
 
-#creat board. site is blocked if cell == 0
-board = np.zeros((N**2 + 2))
+    while run.percolates == False:
 
+        #randomly select a cell and open. Only choose from closed cells
+        if run.is_open:
+            i = random.choice(run.is_open)
+            run.is_open.remove(i)
+        else:
+            sys.exit("Error: All nodes open")
+        run.board[i] = True
+        run.open += 1
 
-while percolates == False:
+        #connect to neighbours
+        neighb = [i - N, i + N]
+        if (i - 1) % N != 0:
+            neighb.append(i - 1)
+        if i % N != 0:
+            neighb.append(i + 1)
+        for j in neighb:
+            if 1 < j < N**2 + 1:
+                if run.board[j]:
+                    run.union(i, j)
 
-    #randomly select a cell and open
-    if is_open:
-        i = random.choice(is_open)
-        is_open.remove(i)
-    board[i] = 1
-    open += 1
+        #check if percolates
+        if run.connected(0, N**2 + 1):
+            run.percolates = True
 
-    #connect to neighbours
-    neighb = [i - N, i + N]
-    if (i - 1) % N != 0:
-        neighb.append(i - 1)
-    if i % N != 0:
-        neighb.append(i + 1)
-    for j in neighb:
-        if j in range(1, N**2 + 1):
-            if board[j] == 1:
-                union(i, j)
-    #check if percolates
-    if connected(0, N**2 + 1):
-        percolates = True
+    return float(run.open) / N**2
 
-print float(open) / N**2
+class PercolationStats():
+    '''
+    Percolation Statistics for T independent tests of N*N board
+    '''
 
-'''
-#optionally print out the board
-for i in range(1, N**2 - (N - 2), N):
-    print board[range(i, i + N)]
-'''
+    def percolationStats(self, N, T):
+        '''
+        Runs T independent tests of N*N board
+        :param N: Board size
+        :param T: Number of iterations of percolation
+        :return: array of threshold estimates
+        '''
+        self.est = []
+        for i in range(1, T + 1):
+            self.est.append(runPercolation(N))
+        stats = {'mean': self.mean(self.est),
+                 'sd': self.sd(self.est),
+                 '95% confidence int': self.confidence(self.mean(self.est), self.sd(self.est))
+                 }
+        print self.est
+        print stats['mean']
+        print stats['sd']
+        print stats['95% confidence int']
+#
+    def mean(self, x):
+        return np.mean(x)
+
+    def sd(self, x):
+        return np.std(x)
+
+    def confidence(self, mean, sd):
+        return stats.norm.interval(0.95, mean, sd)
+
+test = PercolationStats()
+print test.percolationStats(1280, 2)
+
+print time.clock() - startTime
