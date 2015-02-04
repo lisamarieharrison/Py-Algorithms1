@@ -2,19 +2,15 @@ import numpy as np
 from scipy import stats
 import random
 import sys
-import time
 
-startTime = time.clock()
 
 class Percolation():
 
     def __init__(self, N):
         self.N = N
-        self.open = 0
         self.percolates = False #does the system percolate?
         self.sz = np.ones((self.N**2 + 2)) #tree size starts at 1 for all nodes
         self.id = range(0, N**2 + 2) #0 = false top and N**2 + 1 == false bottom
-        self.is_open = range(1, N**2 + 1) #array of nodes that are closed
 
     def percolation(self, N):
         '''
@@ -81,14 +77,9 @@ def runPercolation(N):
 
     while run.percolates == False:
 
-        #randomly select a cell and open. Only choose from closed cells
-        if run.is_open:
-            i = random.choice(run.is_open)
-            run.is_open.remove(i)
-        else:
-            sys.exit("Error: All nodes open")
+        #randomly select a cell and open. Only choose from closed cells (where board = FALSE)
+        i = random.choice([i for i, elem in enumerate(run.board, 1) if not elem]) - 1
         run.board[i] = True
-        run.open += 1
 
         #connect to neighbours
         neighb = [i - N, i + N]
@@ -105,7 +96,7 @@ def runPercolation(N):
         if run.connected(0, N**2 + 1):
             run.percolates = True
 
-    return float(run.open) / N**2
+    return float(sum(run.board)) / N**2
 
 class PercolationStats():
     '''
@@ -119,6 +110,8 @@ class PercolationStats():
         :param T: Number of iterations of percolation
         :return: array of threshold estimates
         '''
+        if N < 1 or T < 1:
+            sys.exit("Error: Input N and T > 0")
         self.est = []
         for i in range(1, T + 1):
             self.est.append(runPercolation(N))
@@ -126,10 +119,10 @@ class PercolationStats():
                  'sd': self.sd(self.est),
                  '95% confidence int': self.confidence(self.mean(self.est), self.sd(self.est))
                  }
-        print self.est
-        print stats['mean']
-        print stats['sd']
-        print stats['95% confidence int']
+        print 'Estimate:', self.est
+        print 'Mean:', stats['mean']
+        print 'SD:', stats['sd']
+        print '98% confidence interval:', stats['95% confidence int']
 #
     def mean(self, x):
         return np.mean(x)
@@ -141,6 +134,5 @@ class PercolationStats():
         return stats.norm.interval(0.95, mean, sd)
 
 test = PercolationStats()
-print test.percolationStats(1280, 2)
+print test.percolationStats(20, 20)
 
-print time.clock() - startTime
