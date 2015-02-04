@@ -78,7 +78,7 @@ def runPercolation(N):
 
     while run.percolates == False:
 
-        #randomly select a cell and open. Only choose from closed cells (where board = FALSE)
+        #randomly select a cell and open. Only choose from closed cells
         i = random.choice(run.is_open)
         run.is_open.remove(i)
         run.board[i] = True
@@ -120,7 +120,7 @@ class PercolationStats():
         print 'Mean:', np.mean(self.est)
         print 'SD:', np.std(self.est)
         print '95% confidence interval:', stats.norm.interval(0.05, np.mean(self.est), np.std(self.est))
-#
+
 test = PercolationStats()
-print test.percolationStats(20, 100)
+print test.percolationStats(2, 50)
 
