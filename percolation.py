@@ -11,6 +11,7 @@ class Percolation():
         self.percolates = False #does the system percolate?
         self.sz = np.ones((self.N**2 + 2)) #tree size starts at 1 for all nodes
         self.id = range(0, N**2 + 2) #0 = false top and N**2 + 1 == false bottom
+        self.is_open = range(1, N**2 + 1) #which cells are currently open
 
     def percolation(self, N):
         '''
@@ -22,7 +23,7 @@ class Percolation():
         self.board = [False] * (N**2 + 2) #create boolean board of N**2 values + false top and bottom
 
         #join false top and bottom to first and last rows
-        for i in range(1, N):
+        for i in range(1, N + 1):
             self.id[i] = 0
         for i in range(N**2 - N + 1, N**2 + 1):
             self.id[i] = N**2 + 1
@@ -59,10 +60,10 @@ class Percolation():
         if y_root != x_root:
             #if roots are not the same, move smaller tree to larger tree
             if self.sz[x] <= self.sz[y]:
-                self.id[x_root] = y
+                self.id[x_root] = y_root
                 self.sz[y] += self.sz[x]
             else:
-                self.id[y_root] = x
+                self.id[y_root] = x_root
                 self.sz[x] += self.sz[y]
 
 
@@ -78,7 +79,8 @@ def runPercolation(N):
     while run.percolates == False:
 
         #randomly select a cell and open. Only choose from closed cells (where board = FALSE)
-        i = random.choice([i for i, elem in enumerate(run.board, 1) if not elem]) - 1
+        i = random.choice(run.is_open)
+        run.is_open.remove(i)
         run.board[i] = True
 
         #connect to neighbours
@@ -88,7 +90,7 @@ def runPercolation(N):
         if i % N != 0:
             neighb.append(i + 1)
         for j in neighb:
-            if 1 < j < N**2 + 1:
+            if 0 < j < N**2 + 1:
                 if run.board[j]:
                     run.union(i, j)
 
