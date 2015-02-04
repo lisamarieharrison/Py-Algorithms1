@@ -115,24 +115,10 @@ class PercolationStats():
         self.est = []
         for i in range(1, T + 1):
             self.est.append(runPercolation(N))
-        stats = {'mean': self.mean(self.est),
-                 'sd': self.sd(self.est),
-                 '95% confidence int': self.confidence(self.mean(self.est), self.sd(self.est))
-                 }
-        print 'Estimate:', self.est
-        print 'Mean:', stats['mean']
-        print 'SD:', stats['sd']
-        print '98% confidence interval:', stats['95% confidence int']
+        print 'Mean:', np.mean(self.est)
+        print 'SD:', np.std(self.est)
+        print '95% confidence interval:', stats.norm.interval(0.05, np.mean(self.est), np.std(self.est))
 #
-    def mean(self, x):
-        return np.mean(x)
-
-    def sd(self, x):
-        return np.std(x)
-
-    def confidence(self, mean, sd):
-        return stats.norm.interval(0.95, mean, sd)
-
 test = PercolationStats()
-print test.percolationStats(20, 20)
+print test.percolationStats(20, 100)
 
