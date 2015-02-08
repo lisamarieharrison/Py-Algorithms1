@@ -1,16 +1,18 @@
 #Coursera Algorithms 1 - week 2
 import unittest
 
-class LinkedListNode(object):
+class DequeNode(object):
 
-    def __init__(self, item, next):
+    def __init__(self, item, next, previous):
         self.item = item
         self.next = next
+        self.previous = previous
 
-class LinkedList(object):
+class Deque(object):
 
     def __init__(self):
         self.head = None
+        self.tail = None
 
     def isEmpty(self):
         if self.head is None:
@@ -26,9 +28,19 @@ class LinkedList(object):
 
     def addFirst(self, item):
        if self.head is None:
-           self.head = LinkedListNode(item, next = None)
+           self.head = DequeNode(item, next=None, previous=None)
+           self.tail = self.head
        else:
-           self.head = LinkedListNode(item, next = self.head)
+           self.head.previous = DequeNode(item, next=self.head, previous=None)
+           self.head = self.head.previous
+
+    def addLast(self, item):
+        if self.head is None:
+            self.head = DequeNode(item, next=None, previous=None)
+            self.tail = self.head
+        else:
+            self.tail.next = DequeNode(item, next=None, previous=self.tail)
+            self.tail = self.tail.next
 
     def removeFirst(self):
         if self.isEmpty():
@@ -40,11 +52,23 @@ class LinkedList(object):
             self.head = self.head.next
         return first_item
 
+    def removeLast(self):
+        if self.isEmpty():
+            raise RuntimeError("Cannot remove item from empty list")
+        last_item = self.tail.item
+        if self.tail.previous is None:
+            self.head = None
+            self.tail = None
+        else:
+            self.tail.previous.next = None
+            self.tail = self.tail.previous
+        return last_item
+
     def __iter__(self):
-        return LinkedListIterate(self.head)
+        return DequeIterate(self.head)
 
     def __repr__(self):
-        repr_so_far = '<LinkedList with items '
+        repr_so_far = '<Deque with items '
         for i, current in enumerate(self):
             if i != 0:
                 repr_so_far += ', '
@@ -52,7 +76,7 @@ class LinkedList(object):
         repr_so_far += '>'
         return repr_so_far
 
-class LinkedListIterate(object):
+class DequeIterate(object):
 
     def __init__(self, current):
         self.current = current
@@ -74,48 +98,96 @@ class TestListLinked(unittest.TestCase):
 
     def test_head_is_printed_properly_in_repr(self):
         to_add = 10
-        l = LinkedList()
+        l = Deque()
         l.addFirst(to_add)
-        self.assertEqual('<LinkedList with items {}>'.format(to_add), l.__repr__())
+        self.assertEqual('<Deque with items {}>'.format(to_add), l.__repr__())
 
     def test_multiple_addFirsts(self):
-        l = LinkedList()
+        l = Deque()
         l.addFirst(20)
         l.addFirst(10)
-        self.assertEqual('<LinkedList with items {}, {}>'.format(10, 20), l.__repr__())
+        self.assertEqual('<Deque with items {}, {}>'.format(10, 20), l.__repr__())
+
+    def test_multiple_addLast(self):
+        l = Deque()
+        l.addLast(20)
+        l.addLast(10)
+        self.assertEqual('<Deque with items {}, {}>'.format(20, 10), l.__repr__())
+
+    def test_addFirst_and_addLast(self):
+        l = Deque()
+        l.addFirst(20)
+        l.addLast(10)
+        l.addFirst(5)
+        self.assertEqual('<Deque with items {}, {}, {}>'.format(5, 20, 10), l.__repr__())
 
     def test_removeFirst_for_two_items(self):
-        l = LinkedList()
+        l = Deque()
         l.addFirst(20)
         l.addFirst(10)
         l.removeFirst()
-        self.assertEqual('<LinkedList with items {}>'.format(20), l.__repr__())
+        self.assertEqual('<Deque with items {}>'.format(20), l.__repr__())
 
     def test_removeFirst_for_single_item(self):
-        l = LinkedList()
+        l = Deque()
         l.addFirst(20)
         l.removeFirst()
-        self.assertEqual('<LinkedList with items >', l.__repr__())
+        self.assertEqual('<Deque with items >', l.__repr__())
+
+    def test_removeLast_for_single_item(self):
+        l = Deque()
+        l.addFirst(20)
+        l.removeLast()
+        self.assertEqual('<Deque with items >', l.__repr__())
+
+    def test_removeLast_for_two_items(self):
+        l = Deque()
+        l.addFirst(20)
+        l.addFirst(10)
+        l.removeLast()
+        self.assertEqual('<Deque with items {}>'.format(10), l.__repr__())
+
+    def test_removeFirst_return(self):
+        l = Deque()
+        l.addFirst(20)
+        l.addFirst(10)
+        self.assertEqual(10, l.removeFirst())
+
+    def test_removeLast_return(self):
+        l = Deque()
+        l.addFirst(20)
+        l.addFirst(10)
+        self.assertEqual(20, l.removeLast())
 
     def test_removeFirst_for_empty_lists(self):
-        l = LinkedList()
+        l = Deque()
         self.assertRaises(RuntimeError, l.removeFirst)
 
+    def test_combination_add_and_remove(self):
+        l = Deque()
+        l.addFirst(20)
+        l.addFirst(10)
+        l.addLast(5)
+        l.removeFirst()
+        l.addLast(30)
+        l.removeLast()
+        self.assertEqual('<Deque with items {}, {}>'.format(20, 5), l.__repr__())
+
     def test_isEmpty_on_empty_list(self):
-        l = LinkedList()
+        l = Deque()
         self.assertTrue(l.isEmpty())
 
     def test_isEmpty_on_full_list(self):
-        l = LinkedList()
+        l = Deque()
         l.addFirst(20)
         self.assertEqual(False, l.isEmpty())
 
     def test_size_on_full_array(self):
-        l = LinkedList()
+        l = Deque()
         for i in range(1, 21):
             l.addFirst(i)
         self.assertEqual(20, l.size())
 
     def test_size_on_empty_array(self):
-        l = LinkedList()
+        l = Deque()
         self.assertEqual(0, l.size())
