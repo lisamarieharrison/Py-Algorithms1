@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-import random
+from random import shuffle
 import sys
 
 
@@ -12,6 +12,7 @@ class Percolation():
         self.sz = np.ones((self.N**2 + 2)) #tree size starts at 1 for all nodes
         self.id = range(0, N**2 + 2) #0 = false top and N**2 + 1 == false bottom
         self.is_open = range(1, N**2 + 1) #which cells are currently open
+        shuffle(self.is_open)
 
     def percolation(self, N):
         '''
@@ -74,13 +75,13 @@ def runPercolation(N):
     :return: int giving the percolation threshold
     '''
     run = Percolation(N)
-    init = run.percolation(N)
+    run.percolation(N)
 
     while run.percolates == False:
 
         #randomly select a cell and open. Only choose from closed cells
-        i = random.choice(run.is_open)
-        run.is_open.remove(i)
+        i = run.is_open[0]
+        run.is_open.pop(0)
         run.board[i] = True
 
         #connect to neighbours
@@ -122,5 +123,5 @@ class PercolationStats():
         print '95% confidence interval:', stats.norm.interval(0.05, np.mean(self.est), np.std(self.est))
 
 test = PercolationStats()
-print test.percolationStats(2, 100000)
+print test.percolationStats(200, 2)
 
