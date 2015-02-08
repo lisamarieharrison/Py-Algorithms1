@@ -12,23 +12,43 @@ class LinkedList(object):
     def __init__(self):
         self.head = None
 
-    def push(self, item):
+    def isEmpty(self):
+        if self.head is None:
+            return True
+        else:
+            return False
+
+    def size(self):
+        sz = 0
+        for i, current in enumerate(self):
+            sz += 1
+        return sz
+
+    def addFirst(self, item):
        if self.head is None:
-           self.head = LinkedListNode(item, next=None)
+           self.head = LinkedListNode(item, next = None)
        else:
-           self.head = LinkedListNode(item, next=self.head)
+           self.head = LinkedListNode(item, next = self.head)
+
+    def removeFirst(self):
+        if self.isEmpty():
+            raise RuntimeError("Cannot remove item from empty list")
+        first_item = self.head.item
+        if self.head.next is None:
+            self.head = None
+        else:
+            self.head = self.head.next
+        return first_item
 
     def __iter__(self):
         return LinkedListIterate(self.head)
 
     def __repr__(self):
         repr_so_far = '<LinkedList with items '
-        current = self.head
-        while current is not None:
-            if current != self.head:
+        for i, current in enumerate(self):
+            if i != 0:
                 repr_so_far += ', '
-            repr_so_far += str(current.item)
-            current = current.next
+            repr_so_far += str(current)
         repr_so_far += '>'
         return repr_so_far
 
@@ -48,17 +68,6 @@ class LinkedListIterate(object):
             self.current = self.current.next
             return temp_current
 
-# l = [1, 2]
-# for x in l:
-#     print str(x)
-#
-# iterator = l.__iter__()
-# x = iterator.next()
-# while x is not None:
-#     print str(x)
-#     x = iterator.next()
-
-import random
 class TestListLinked(unittest.TestCase):
     # def setUp(self):
     #     self.seq = range(10)
@@ -66,31 +75,47 @@ class TestListLinked(unittest.TestCase):
     def test_head_is_printed_properly_in_repr(self):
         to_add = 10
         l = LinkedList()
-        l.push(to_add)
+        l.addFirst(to_add)
         self.assertEqual('<LinkedList with items {}>'.format(to_add), l.__repr__())
 
-    def test_multiple_pushs(self):
+    def test_multiple_addFirsts(self):
         l = LinkedList()
-        l.push(20)
-        l.push(10)
+        l.addFirst(20)
+        l.addFirst(10)
         self.assertEqual('<LinkedList with items {}, {}>'.format(10, 20), l.__repr__())
 
+    def test_removeFirst_for_two_items(self):
+        l = LinkedList()
+        l.addFirst(20)
+        l.addFirst(10)
+        l.removeFirst()
+        self.assertEqual('<LinkedList with items {}>'.format(20), l.__repr__())
 
-    # def test_shuffle(self):
-    #     # make sure the shuffled sequence does not lose any elements
-    #     random.shuffle(self.seq)
-    #     self.seq.sort()
-    #     self.assertEqual(self.seq, range(10))
-    #
-    #     # should raise an exception for an immutable sequence
-    #     self.assertRaises(TypeError, random.shuffle, (1,2,3))
-    #
-    # def test_choice(self):
-    #     element = random.choice(self.seq)
-    #     self.assertTrue(element in self.seq)
-    #
-    # def test_sample(self):
-    #     with self.assertRaises(ValueError):
-    #         random.sample(self.seq, 20)
-    #     for element in random.sample(self.seq, 5):
-    #         self.assertTrue(element in self.seq)
+    def test_removeFirst_for_single_item(self):
+        l = LinkedList()
+        l.addFirst(20)
+        l.removeFirst()
+        self.assertEqual('<LinkedList with items >', l.__repr__())
+
+    def test_removeFirst_for_empty_lists(self):
+        l = LinkedList()
+        self.assertRaises(RuntimeError, l.removeFirst)
+
+    def test_isEmpty_on_empty_list(self):
+        l = LinkedList()
+        self.assertTrue(l.isEmpty())
+
+    def test_isEmpty_on_full_list(self):
+        l = LinkedList()
+        l.addFirst(20)
+        self.assertEqual(False, l.isEmpty())
+
+    def test_size_on_full_array(self):
+        l = LinkedList()
+        for i in range(1, 21):
+            l.addFirst(i)
+        self.assertEqual(20, l.size())
+
+    def test_size_on_empty_array(self):
+        l = LinkedList()
+        self.assertEqual(0, l.size())
