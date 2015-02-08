@@ -122,5 +122,5 @@ class PercolationStats():
         print '95% confidence interval:', stats.norm.interval(0.05, np.mean(self.est), np.std(self.est))
 
 test = PercolationStats()
-print test.percolationStats(2, 50)
+print test.percolationStats(2, 100000)
 
