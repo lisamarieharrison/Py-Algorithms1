@@ -1,6 +1,7 @@
 from random import shuffle
+#import numpy as np
+#from scipy import stats
 import sys
-import time
 
 class Percolation():
     def __init__(self, n):
@@ -11,10 +12,8 @@ class Percolation():
         self.is_open = range(1, n**2 + 1)  # which cells are currently open
         self.board = [False] * (n**2 + 2)  # create boolean board of n**2 values + false top and bottom
         # join false top and bottom to first and last rows
-        for i in range(1, n + 1):
-            self.id[i] = 0
-        for i in range(n**2 - n + 1, n**2 + 1):
-            self.id[i] = n**2 + 1
+        self.id[1:(n + 1)] = [0]*n
+        self.id[(n**2 - n + 1):(n**2 + 1)] = [n**2 + 1]*n
         shuffle(self.is_open)
 
     def root(self, n):
@@ -47,38 +46,52 @@ class Percolation():
             self.id[y_root] = x_root
             self.sz[x_root] += self.sz[y_root]
 
+    def find_neighbours(self, node):
+        '''Finds the open neighbours of a given node'''
+        neighbours = []
+        if node > self.n:
+            if self.board[node - self.n]:
+                neighbours.append(node - self.n)
+        if node <= (self.n**2 - self.n):
+            if self.board[node + self.n]:
+                neighbours.append(node + self.n)
+        if (node - 1) % self.n != 0:
+            if self.board[node - 1]:
+                neighbours.append(node - 1)
+        if node % self.n != 0:
+            if self.board[node + 1]:
+                neighbours.append(node + 1)
+        return neighbours
+
 
 def run_percolation(n):
     '''
     Runs a single percolation problem
     :param n: Board size
-    :return: int giving the percolation threshold
-    '''
+    :return: int giving the percolation threshold'''
+
     run = Percolation(n)
 
+    current_open = 0
     while not run.percolates:
 
-        # randomly select a cell and open. Only choose from closed cells
-        i = run.is_open.pop(0)
+        # select a cell and open. Only choose from closed cells
+        i = run.is_open[current_open]
+
+        current_open += 1
 
         run.board[i] = True
 
         # connect to neighbours
-        neighbours = [i - n, i + n]
-        if (i - 1) % n != 0:
-            neighbours.append(i - 1)
-        if i % n != 0:
-            neighbours.append(i + 1)
+        neighbours = run.find_neighbours(i)
         for j in neighbours:
-            if 0 < j < n**2 + 1:
-                if run.board[j]:
-                    run.union(i, j)
+            run.union(i, j)
 
         # check if percolates
         if run.connected(0, n**2 + 1):
             run.percolates = True
 
-    return float(sum(run.board)) / n**2
+    return float(current_open + 1) / n**2
 
 
 def percolation_stats(n, t):
@@ -92,13 +105,10 @@ def percolation_stats(n, t):
     est = []
     for i in range(1, t + 1):
         est.append(run_percolation(n))
-    # print 'Mean:', np.mean(self.est)
-    # print 'SD:', np.std(self.est)
-    # print '95% confidence interval:', stats.norm.interval(0.05, np.mean(self.est), np.std(self.est))
+    #print 'Mean:', np.mean(est)
+    # print 'SD:', np.std(est)
+    # print '95% confidence interval:', stats.norm.interval(0.05, np.mean(est), np.std(est))
 
 import cProfile
-cProfile.run('percolation_stats(256, 1)')
-# start_time = time.clock()
-# print percolation_stats(256, 1)
-# print 'Time (s):', time.clock() - start_time
+cProfile.run('percolation_stats(300, 100)', sort='time')
 
