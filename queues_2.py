@@ -1,14 +1,14 @@
-#Coursera Algorithms 1 - week 2
+#Coursera Algorithms 1 - week 2, part 2
 import unittest
+import random
 
-class DequeNode(object):
+class LinkedListNode(object):
 
-    def __init__(self, item, next, previous):
+    def __init__(self, item, next):
         self.item = item
         self.next = next
-        self.previous = previous
 
-class Deque(object):
+class LinkedList(object):
 
     def __init__(self):
         self.head = None
@@ -26,29 +26,54 @@ class Deque(object):
             sz += 1
         return sz
 
-    def addFirst(self, item):
+    def enqueue(self, item):
        if self.head is None:
-           self.head = DequeNode(item, next=None, previous=None)
-           self.tail = self.head
+           self.head = LinkedListNode(item, next=None)
        else:
-           self.head.previous = DequeNode(item, next=self.head, previous=None)
-           self.head = self.head.previous
+           self.head = LinkedListNode(item, next=self.head)
 
-    def removeFirst(self):
+    def dequeue(self):
         if self.isEmpty():
             raise RuntimeError("Cannot remove item from empty list")
-        first_item = self.head.item
+        item_index = random.randint(0, self.size())
         if self.head.next is None:
+            random_item = self.head.item
             self.head = None
         else:
-            self.head = self.head.next
-        return first_item
+            current = self.head
+            if item_index == 0:
+                random_item = self.head.item
+                self.head = self.head.next
+            else:
+                for i in range(0, item_index + 1):
+                    if i == item_index - 1:
+                        random_item = current.next.item
+                        if item_index < self.size():
+                            current.next = current.next.next
+                        else:
+                            current.next = None
+                    current = current.next
+        return random_item
+
+    def sample(self):
+        if self.isEmpty():
+            raise RuntimeError("Cannot remove item from empty list")
+        item_index = random.randint(0, self.size())
+        current = self.head
+        if item_index == 0:
+            random_item = self.head.item
+        else:
+            for i in range(0, item_index + 1):
+                if i == item_index - 1:
+                    random_item = current.next.item
+                current = current.next
+        return random_item
 
     def __iter__(self):
-        return DequeIterate(self.head)
+        return LinkedListIterate(self.head)
 
     def __repr__(self):
-        repr_so_far = '<Deque with items '
+        repr_so_far = '<LinkedList with items '
         for i, current in enumerate(self):
             if i != 0:
                 repr_so_far += ', '
@@ -56,7 +81,7 @@ class Deque(object):
         repr_so_far += '>'
         return repr_so_far
 
-class DequeIterate(object):
+class LinkedListIterate(object):
 
     def __init__(self, current):
         self.current = current
@@ -76,6 +101,71 @@ class TestListLinked(unittest.TestCase):
 
     def test_head_is_printed_properly_in_repr(self):
         to_add = 10
-        l = Deque()
-        l.addFirst(to_add)
-        self.assertEqual('<Deque with items {}>'.format(to_add), l.__repr__())
+        l = LinkedList()
+        l.enqueue(to_add)
+        self.assertEqual('<LinkedList with items {}>'.format(to_add), l.__repr__())
+
+    def test_size_gets_correct_size_full_array(self):
+        to_add = range(1, 21)
+        l = LinkedList()
+        for i in to_add:
+            l.enqueue(i)
+        self.assertEqual(len(to_add), l.size())
+
+    def test_size_gets_correct_size_empty_array(self):
+        l = LinkedList()
+        self.assertEqual(0, l.size())
+
+    def test_isEmpty_on_full_array(self):
+        l = LinkedList()
+        l.enqueue(1)
+        self.assertEqual(False, l.isEmpty())
+
+    def test_isEmpty_on_empty_array(self):
+        l = LinkedList()
+        self.assertEqual(True, l.isEmpty())
+
+    def test_enqueue_adds_to_front(self):
+        l = LinkedList()
+        l.enqueue(10)
+        l.enqueue(20)
+        self.assertEqual('<LinkedList with items {}, {}>'.format(20, 10), l.__repr__())
+
+    def test_dequeue_removes_an_item(self):
+        to_add = range(1, 21)
+        l = LinkedList()
+        for i in to_add:
+            l.enqueue(i)
+        l.dequeue()
+        l.dequeue()
+        self.assertEqual(18, l.size())
+
+    def test_dequeue_for_single_value(self):
+        l = LinkedList()
+        l.enqueue(1)
+        random_item = l.dequeue()
+        self.assertEqual(1, random_item)
+
+    def test_dequeue_returns_int(self):
+        to_add = range(1, 21)
+        l = LinkedList()
+        for i in to_add:
+            l.enqueue(i)
+        random_item = l.dequeue()
+        self.assertEqual(True, isinstance(random_item, int))
+
+    def test_sample_returns_int(self):
+        to_add = range(1, 21)
+        l = LinkedList()
+        for i in to_add:
+            l.enqueue(i)
+        random_item = l.sample()
+        self.assertEqual(True, isinstance(random_item, int))
+
+    def test_sample_doesnt_remove_item(self):
+        to_add = range(1, 21)
+        l = LinkedList()
+        for i in to_add:
+            l.enqueue(i)
+        random_item = l.sample()
+        self.assertEqual(20, l.size())
