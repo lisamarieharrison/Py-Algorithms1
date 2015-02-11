@@ -2,6 +2,7 @@ from random import shuffle
 #import numpy as np
 #from scipy import stats
 import sys
+import time
 
 class Percolation():
     def __init__(self, n):
@@ -91,7 +92,7 @@ def run_percolation(n):
         if run.connected(0, n**2 + 1):
             run.percolates = True
 
-    return float(current_open + 1) / n**2
+    return float(current_open) / n**2
 
 
 def percolation_stats(n, t):
@@ -105,10 +106,15 @@ def percolation_stats(n, t):
     est = []
     for i in range(1, t + 1):
         est.append(run_percolation(n))
-    #print 'Mean:', np.mean(est)
+    # print 'Mean:', sum(est)/len(est)
     # print 'SD:', np.std(est)
     # print '95% confidence interval:', stats.norm.interval(0.05, np.mean(est), np.std(est))
 
-import cProfile
-cProfile.run('percolation_stats(300, 100)', sort='time')
+# import cProfile
+# cProfile.run('percolation_stats(200, 100)', sort='time')
 
+start_time = time.clock()
+
+percolation_stats(300, 100)
+
+print time.clock() - start_time
