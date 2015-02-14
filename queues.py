@@ -13,6 +13,7 @@ class Deque(object):
     def __init__(self):
         self.head = None
         self.tail = None
+        self.sz = 0
 
     def isEmpty(self):
         if self.head is None:
@@ -21,12 +22,10 @@ class Deque(object):
             return False
 
     def size(self):
-        sz = 0
-        for i, current in enumerate(self):
-            sz += 1
-        return sz
+        return self.sz
 
     def addFirst(self, item):
+       self.sz += 1
        if self.head is None:
            self.head = DequeNode(item, next=None, previous=None)
            self.tail = self.head
@@ -35,6 +34,7 @@ class Deque(object):
            self.head = self.head.previous
 
     def addLast(self, item):
+        self.sz += 1
         if self.head is None:
             self.head = DequeNode(item, next=None, previous=None)
             self.tail = self.head
@@ -45,6 +45,7 @@ class Deque(object):
     def removeFirst(self):
         if self.isEmpty():
             raise RuntimeError("Cannot remove item from empty list")
+        self.sz -= 1
         first_item = self.head.item
         if self.head.next is None:
             self.head = None
@@ -55,6 +56,7 @@ class Deque(object):
     def removeLast(self):
         if self.isEmpty():
             raise RuntimeError("Cannot remove item from empty list")
+        self.sz -= 1
         last_item = self.tail.item
         if self.tail.previous is None:
             self.head = None
@@ -93,8 +95,6 @@ class DequeIterate(object):
             return temp_current
 
 class TestListLinked(unittest.TestCase):
-    # def setUp(self):
-    #     self.seq = range(10)
 
     def test_head_is_printed_properly_in_repr(self):
         to_add = 10
