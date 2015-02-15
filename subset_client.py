@@ -5,9 +5,12 @@ import numpy as np
 
 class Array(object):
 
-    def __init__(self):
+    def __init__(self, str = None):
         self.Array = np.empty((0, ))
         self.sz = 0
+        if str is not None:
+            self.Array = str
+            self.sz = len(str)
 
     def isEmpty(self):
         if self.sz == 0:
@@ -79,6 +82,16 @@ class ArrayIterate(object):
             temp_current = self.obj[self.current]
             self.current = self.current + 1
             return temp_current
+
+class Subset(object):
+
+    def returnSubset(self, k, str):
+        if k > str.size():
+            raise RuntimeError("k cannot be greater than the length of str")
+        i = 1
+        while i <= k:
+            print str.dequeue(),
+            i += 1
 
 class TestListLinked(unittest.TestCase):
 
@@ -156,3 +169,16 @@ class TestListLinked(unittest.TestCase):
         l.sample()
         end_length = l.size()
         self.assertEqual(start_length, end_length)
+
+    def test_subset(self):
+        str = np.array(range(1, 21))
+        str = Array(str)
+        sub = Subset()
+        sub.returnSubset(11, str)
+        self.assertEqual(9, str.size())
+
+    def test_subset_error_k_larger_N(self):
+        str = np.array(range(1, 5))
+        str = Array(str)
+        sub = Subset()
+        self.assertRaises(RuntimeError, sub.returnSubset, 11, str)
