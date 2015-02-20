@@ -1,6 +1,5 @@
 import unittest
-import plotly.plotly as py
-from plotly.graph_objs import *
+import matplotlib
 
 class Point(object):
 
