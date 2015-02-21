@@ -9,9 +9,29 @@ class Point(object):
         self.x = x
         self.y = y
 
-    def comparator(self):
+    def comparator(self, points):
         # Compare points by slope to this point
-        pass
+        slope = []
+        for q in points:
+            if q.x == self.x and q.y == self.y: # if point is not self, find the slope
+                pass
+            else:
+                dy_dx = (q.y - self.y) / (q.x - self.x)
+                slope.append(dy_dx)
+        slope_key = sorted(range(len(slope)), key=lambda k: slope[k])
+        slope.sort()
+
+        i = 0
+        while i < (len(slope) - 1):
+            collinear_points = [0]
+            while slope[i] == slope[i + 1]:
+                collinear_points.append(slope_key[i + 1])
+                i += 1
+            i += 1
+            if len(collinear_points) >= 4:
+                return collinear_points
+            else:
+                return None
 
     def draw_to(self, point_that):
         # draw a segment from this point to that point
@@ -29,7 +49,7 @@ def draw(point_list):
     plt.axis([0, max(x)*1.2, 0, max(y)*1.2])
     plt.show()
 
-with open('C:/Users/Lisa/Documents/code/collinear/input2.txt') as f:
+with open('C:/Users/Lisa/Documents/code/collinear/input6.txt') as f:
     next(f)
     point_array = [[float(digit) for digit in line.split()] for line in f]
 
@@ -38,8 +58,12 @@ point_collection = []
 for point in point_array:
     point_collection.append(Point(x=point[0], y=point[1]))
 
-draw(point_array)
+# plot all points
+# draw(point_array)
 
+# find collinear points
+p = point_collection[0].comparator(point_collection)
+print p
 
 class CollinearPoints(unittest.TestCase):
 
