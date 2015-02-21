@@ -23,7 +23,7 @@ class Point(object):
 
         i = 1
         while i < (len(slope) - 1):
-            collinear_points = [0, 1]
+            collinear_points = [slope_key[0], slope_key[1]]
             while slope[i] == slope[i + 1]:
                 collinear_points.append(slope_key[i + 1])
                 i += 1
@@ -90,12 +90,23 @@ for point in point_array:
     point_collection.append(Point(x=point[0], y=point[1]))
 
 # plot all points
-draw(point_array)
+# draw(point_array)
 
 # find collinear points
 p = []
 for point in point_collection:
     p.append(point.comparator(point_collection))
+
+if len(p) > 1:
+    line = 1
+    while line < len(p):
+        if p[line] is None:
+            p.pop(line)
+        elif p[line].sort() ==  p[line - 1].sort():
+            p.pop(line)
+        else:
+            line = line + 1
+print p
 
 max_point = []
 min_point = []
@@ -104,7 +115,6 @@ for i in p:
         min_point.append([find_first(point_collection, i)])
         max_point.append([find_last(point_collection, i)])
 
-print p
 draw_to(min_point, max_point, point_array)
 
 class CollinearPoints(unittest.TestCase):
