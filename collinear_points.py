@@ -56,6 +56,9 @@ def draw_to(min_point, max_point, point_list):
     for line in range(0, len(max_point)):
         x2.append([point_array[min_point[line][0]][0], point_array[max_point[line][0]][0]])
         y2.append([point_array[min_point[line][0]][1], point_array[max_point[line][0]][1]])
+        if len(x2) == 1:
+            x2 = x2[0]
+            y2 = y2[0]
     plt.plot(x, y, 'ro', x2, y2)
     plt.axis([0, max(x)*1.2, 0, max(y)*1.2])
     plt.show()
@@ -106,7 +109,6 @@ if len(p) > 1:
             p.pop(line)
         else:
             line = line + 1
-print p
 
 max_point = []
 min_point = []
