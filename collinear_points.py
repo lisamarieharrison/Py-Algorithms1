@@ -56,20 +56,18 @@ def draw_to(min_point, max_point, point_list):
     for point in point_list:
         x.append(point[0])
         y.append(point[1])
-    x2 = []
-    y2 = []
+    x2 = [[], []]
+    y2 = [[], []]
     for line in range(0, len(max_point)):
-        x2.append([point_array[min_point[line][0]][0], point_array[max_point[line][0]][0]])
-        y2.append([point_array[min_point[line][0]][1], point_array[max_point[line][0]][1]])
-    if len(x2) == 1:
-        x2 = x2[0]
-        y2 = y2[0]
+        x2[0].append(point_array[min_point[line][0]][0])
+        x2[1].append(point_array[max_point[line][0]][0])
+        y2[0].append(point_array[min_point[line][0]][1])
+        y2[1].append(point_array[max_point[line][0]][1])
     plt.plot(x, y, 'ro', x2, y2)
     plt.axis([0, max(x)*1.2, 0, max(y)*1.2])
     plt.show()
 
 def find_first(point_list, key):
-    print key
     min = key[0]
     for i in range(1, len(key)):
         if point_list[key[i]].x < point_list[min].x:
@@ -89,7 +87,7 @@ def find_last(point_list, key):
                 max = key[i]
     return max
 
-with open('C:/Users/Lisa/Documents/code/collinear/input8.txt') as f:
+with open('C:/Users/Lisa/Documents/code/collinear/input200.txt') as f:
     next(f)
     point_array = [[float(digit) for digit in line.split()] for line in f]
 
@@ -122,10 +120,7 @@ min_point = []
 for i in p:
     min_point.append([find_first(point_collection, i)])
     max_point.append([find_last(point_collection, i)])
-print max_point
-print min_point
 draw_to(min_point, max_point, point_array)
-
 class CollinearPoints(unittest.TestCase):
 
     def test_point_has_x_and_y(self):
