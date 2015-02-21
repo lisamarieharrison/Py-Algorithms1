@@ -1,5 +1,6 @@
 import unittest
-import matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Point(object):
 
@@ -12,21 +13,21 @@ class Point(object):
         # Compare points by slope to this point
         pass
 
-    def draw(self):
-        # draw this point
-        trace = Scatter(
-            x=[self.x],
-            y=[self.y],
-            mode='markers'
-        )
-        py.plot([trace])
-
     def draw_to(self, point_that):
         # draw a segment from this point to that point
         pass
 
 
-
+def draw(point_list):
+    # draw all points
+    x = []
+    y = []
+    for point in point_list:
+        x.append(point[0])
+        y.append(point[1])
+    plt.plot(x, y, 'ro')
+    plt.axis([0, max(x)*1.2, 0, max(y)*1.2])
+    plt.show()
 
 with open('C:/Users/Lisa/Documents/code/collinear/input2.txt') as f:
     next(f)
@@ -37,7 +38,8 @@ point_collection = []
 for point in point_array:
     point_collection.append(Point(x=point[0], y=point[1]))
 
-point_collection[1].draw()
+draw(point_array)
+
 
 class CollinearPoints(unittest.TestCase):
 
