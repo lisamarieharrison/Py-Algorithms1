@@ -28,6 +28,11 @@ class Board(object):
                     total_distance += (x + y)
         return total_distance + moves
 
+    def is_goal(self):
+        if self.board == [[1, 2, 3], [4, 5, 6], [7, 8, 0]]:
+            return True
+        else:
+            return False
 
 with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
     next(f)
@@ -37,7 +42,7 @@ print board
 
 board = Board(board)
 
-print board.manhattan(0)
+print board.is_goal()
 
 class EightPuzzle(unittest.TestCase):
     with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
@@ -50,3 +55,10 @@ class EightPuzzle(unittest.TestCase):
 
     def test_manhattan(self):
         self.assertEqual(15, board.manhattan(moves=0))
+
+    def test_is_goal_on_false(self):
+        self.assertEqual(False, board.is_goal())
+
+    def test_is_goal_on_true(self):
+        goal_board = Board([[1, 2, 3], [4, 5, 6], [7, 8, 0]])
+        self.assertTrue(goal_board.is_goal())
