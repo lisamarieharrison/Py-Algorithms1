@@ -1,5 +1,4 @@
 import unittest
-import numpy as np
 import matplotlib.pyplot as plt
 
 class Point(object):
@@ -87,7 +86,7 @@ def find_last(point_list, key):
                 max = key[i]
     return max
 
-with open('C:/Users/Lisa/Documents/code/collinear/input200.txt') as f:
+with open('C:/Users/Lisa/Documents/code/collinear/input40.txt') as f:
     next(f)
     point_array = [[float(digit) for digit in line.split()] for line in f]
 
@@ -95,9 +94,6 @@ with open('C:/Users/Lisa/Documents/code/collinear/input200.txt') as f:
 point_collection = []
 for point in point_array:
     point_collection.append(Point(x=point[0], y=point[1]))
-
-# plot all points
-# draw(point_array)
 
 # find collinear points
 p = []
@@ -121,6 +117,7 @@ for i in p:
     min_point.append([find_first(point_collection, i)])
     max_point.append([find_last(point_collection, i)])
 draw_to(min_point, max_point, point_array)
+
 class CollinearPoints(unittest.TestCase):
 
     def test_point_has_x_and_y(self):
