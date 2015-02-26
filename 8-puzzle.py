@@ -31,7 +31,7 @@ class Board(object):
     def is_goal(self):
         goal_board = np.concatenate([range(1, self.N**2), [0]])
         goal_board = np.reshape(goal_board, (self.N, self.N))
-        if self.board == goal_board:
+        if np.array_equal(self.board, goal_board):
             return True
         else:
             return False
