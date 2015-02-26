@@ -29,10 +29,18 @@ class Board(object):
         return total_distance + moves
 
     def is_goal(self):
-        if self.board == [[1, 2, 3], [4, 5, 6], [7, 8, 0]]:
+        goal_board = np.concatenate([range(1, self.N**2), [0]])
+        goal_board = np.reshape(goal_board, (self.N, self.N))
+        if self.board == goal_board:
             return True
         else:
             return False
+
+
+class Solver(object):
+
+    def solver(self):
+        pass
 
 with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
     next(f)
@@ -42,7 +50,6 @@ print board
 
 board = Board(board)
 
-print board.is_goal()
 
 class EightPuzzle(unittest.TestCase):
     with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
