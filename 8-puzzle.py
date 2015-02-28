@@ -93,7 +93,6 @@ class Board(object):
             # remove minimum priority and find neighbours
             current = queue.get()[1]
             neighbours = current.find_neighbours()
-
             # add neighbours to priority queue
             for i in range(0, len(neighbours)):
                 moves = current.moves_to_reach + 1
@@ -102,14 +101,13 @@ class Board(object):
                     queue.put((neighbours[i].manhattan(moves=moves), neighbours[i]))
                 else:
                     if neighbours[i] != current.previous_node.board:
-                        print neighbours[i]
                         neighbours[i] = Board(neighbours[i], moves_to_reach=moves, previous_node=current)
                         queue.put((neighbours[i].manhattan(moves=moves), neighbours[i]))
 
         return current.moves_to_reach
 
 
-with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
+with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle14.txt') as f:
     next(f)
     board = [[float(digit) for digit in line.split()] for line in f]
 
@@ -117,20 +115,23 @@ board = Board(board, moves_to_reach=0, previous_node=None)
 
 print board.solver()
 
+
 class EightPuzzle(unittest.TestCase):
-    with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
-        next(f)
-        board = [[float(digit) for digit in line.split()] for line in f]
-    board = Board(board, moves_to_reach=0, previous_node=None)
+
+    def setUp(self):
+        with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
+            next(f)
+            self.board = [[float(digit) for digit in line.split()] for line in f]
+        self.board = Board(self.board, moves_to_reach=0, previous_node=None)
 
     def test_hamming(self):
-        self.assertEqual(7, board.hamming(moves=0))
+        self.assertEqual(7, self.board.hamming(moves=0))
 
     def test_manhattan(self):
-        self.assertEqual(15, board.manhattan(moves=0))
+        self.assertEqual(15, self.board.manhattan(moves=0))
 
     def test_is_goal_on_false(self):
-        self.assertEqual(False, board.is_goal())
+        self.assertEqual(False, self.board.is_goal())
 
     def test_is_goal_on_true(self):
         goal_board = Board([[1, 2, 3], [4, 5, 6], [7, 8, 0]], moves_to_reach=0, previous_node=None)
@@ -138,11 +139,11 @@ class EightPuzzle(unittest.TestCase):
 
     def test_find_neighbours(self):
         goal_neighbours = [[[2.0, 8.0, 5.0], [3.0, 6.0, 1.0], [0, 7.0, 4.0]], [[2.0, 8.0, 5.0], [3.0, 6.0, 1.0], [7.0, 4.0, 0]], [[2.0, 8.0, 5.0], [3.0, 0, 1.0], [7.0, 6.0, 4.0]]]
-        self.assertEqual(goal_neighbours, board.find_neighbours())
+        self.assertEqual(goal_neighbours, self.board.find_neighbours())
 
     def test_queue_put(self):
         queue = PriorityQueue()
-        queue.put((board.manhattan(moves=0), board))
+        queue.put((self.board.manhattan(moves=0), self.board))
         current = queue.get()[1]
         neighbours = current.find_neighbours()
         # add neighbours to priority queue
@@ -151,3 +152,7 @@ class EightPuzzle(unittest.TestCase):
             neighbours[i] = Board(neighbours[i], moves_to_reach=moves, previous_node=current)
             queue.put((neighbours[i].manhattan(moves=moves), neighbours[i]))
         self.assertEqual(3, queue.qsize())
+
+    def test_solver_correct_number_of_moves(self):
+        moves = self.board.solver()
+        self.assertEqual(25, moves)
