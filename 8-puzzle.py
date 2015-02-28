@@ -1,6 +1,7 @@
 import numpy as np
 import unittest
 import math
+from Queue import PriorityQueue
 
 class Board(object):
 
@@ -46,48 +47,75 @@ class Board(object):
                 if self.board[i][j] == 0:
                     empty_i = i
                     empty_j = j
-                    break
         return [empty_i, empty_j]
 
+    def clone_board(self):
+        new = [[0 for x in range(self.N)] for x in range(self.N)]
+        for i in range(0, self.N):
+            for j in range(0, self.N):
+                new[i][j] = self.board[i][j]
+        return new
+
     def find_neighbours(self):
-        i = self.board.find_empty()[1]
-        j = self.board.find_empty()[2]
+        i = self.find_empty()[0]
+        j = self.find_empty()[1]
         neighbours = []
         if j > 0:
-            new = self.board
+            new = self.clone_board()
             new[i][j] = new[i][j - 1]
             new[i][j - 1] = 0
             neighbours.append(new)
-        if j < N:
-            new = self.board
+        if j < self.N - 1:
+            new = self.clone_board()
             new[i][j] = new[i][j + 1]
             new[i][j + 1] = 0
             neighbours.append(new)
-        if i < N:
-            new = self.board
+        if i < self.N - 1:
+            new = self.clone_board()
             new[i][j] = new[i + 1][j]
             new[i + 1][j] = 0
             neighbours.append(new)
         if i > 0:
-            new = self.board
+            new = self.clone_board()
             new[i][j] = new[i - 1][j]
             new[i - 1][j] = 0
             neighbours.append(new)
-
-class Solver(object):
+        return neighbours
 
     def solver(self):
-        pass
+
+        queue = PriorityQueue()
+        current = self
+        queue.put((current.manhattan(moves=0), current))
+
+        while not current.is_goal():
+
+            # remove minimum priority and find neighbours
+            current = queue.get()[1]
+            neighbours = current.find_neighbours()
+
+            # add neighbours to priority queue
+            for i in range(0, len(neighbours)):
+                moves = current.moves_to_reach + 1
+                if current.previous_node is None:
+                    neighbours[i] = Board(neighbours[i], moves_to_reach=moves, previous_node=current)
+                    queue.put((neighbours[i].manhattan(moves=moves), neighbours[i]))
+                else:
+                    if neighbours[i] != current.previous_node.board:
+                        print neighbours[i]
+                        neighbours[i] = Board(neighbours[i], moves_to_reach=moves, previous_node=current)
+                        queue.put((neighbours[i].manhattan(moves=moves), neighbours[i]))
+
+        return current.moves_to_reach
 
 
 with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
     next(f)
     board = [[float(digit) for digit in line.split()] for line in f]
 
-print board
-
 board = Board(board, moves_to_reach=0, previous_node=None)
 
+print board.solver()
 
 class EightPuzzle(unittest.TestCase):
     with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
@@ -107,3 +135,19 @@ class EightPuzzle(unittest.TestCase):
     def test_is_goal_on_true(self):
         goal_board = Board([[1, 2, 3], [4, 5, 6], [7, 8, 0]], moves_to_reach=0, previous_node=None)
         self.assertTrue(goal_board.is_goal())
+
+    def test_find_neighbours(self):
+        goal_neighbours = [[[2.0, 8.0, 5.0], [3.0, 6.0, 1.0], [0, 7.0, 4.0]], [[2.0, 8.0, 5.0], [3.0, 6.0, 1.0], [7.0, 4.0, 0]], [[2.0, 8.0, 5.0], [3.0, 0, 1.0], [7.0, 6.0, 4.0]]]
+        self.assertEqual(goal_neighbours, board.find_neighbours())
+
+    def test_queue_put(self):
+        queue = PriorityQueue()
+        queue.put((board.manhattan(moves=0), board))
+        current = queue.get()[1]
+        neighbours = current.find_neighbours()
+        # add neighbours to priority queue
+        for i in range(0, len(neighbours)):
+            moves = current.moves_to_reach + 1
+            neighbours[i] = Board(neighbours[i], moves_to_reach=moves, previous_node=current)
+            queue.put((neighbours[i].manhattan(moves=moves), neighbours[i]))
+        self.assertEqual(3, queue.qsize())
