@@ -2,6 +2,7 @@ import numpy as np
 import unittest
 import math
 from Queue import PriorityQueue
+from threading import Thread
 
 
 class Board(object):
@@ -83,6 +84,42 @@ class Board(object):
             neighbours.append(new)
         return neighbours
 
+    def is_solvable(self):
+        twin_board = self.clone_board()
+        temp_block_1 = twin_board[0][0]
+        temp_block_2 = twin_board[0][1]
+        if temp_block_1 == 0 or temp_block_2 == 0:
+            temp_block_1 = twin_board[1][0]
+            temp_block_2 = twin_board[1][1]
+            twin_board[1][0] = temp_block_2
+            twin_board[1][1] = temp_block_1
+        else:
+            twin_board[0][0] = temp_block_2
+            twin_board[0][1] = temp_block_1
+        twin_board = Board(twin_board, moves_to_reach=0, previous_node=None)
+
+        def func1():
+            t1.daemon = False
+            twin_board.solver()
+            t1.daemon = True
+            print "Board is not solvable"
+            return False
+
+        def func2():
+            t1.daemon = False
+            board.solver()
+            print "Board is solvable"
+            return True
+
+        t1 = Thread(target = func1)
+        t2 = Thread(target = func2)
+        answer1 = t1.start()
+        t2.start()
+        if answer1 is not None:
+            return False
+        else:
+            return True
+
     def solver(self):
 
         queue = PriorityQueue()
@@ -115,20 +152,22 @@ class Board(object):
         return node_trace
 
 
-with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
+with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle2x2-unsolvable1.txt') as f:
     next(f)
     board = [[float(digit) for digit in line.split()] for line in f]
 
 board = Board(board, moves_to_reach=0, previous_node=None)
 
-solve = board.solver()
-print solve.moves_to_reach
+solvable = board.is_solvable()
+if solvable:
+    solve = board.solver()
+    print solve.moves_to_reach
 
-solution = solve.solution()
-for row in solution:
-    for r in row:
-        print r
-    print
+    solution = solve.solution()
+    for row in solution:
+        for r in row:
+            print r
+        print
 
 class EightPuzzle(unittest.TestCase):
 
