@@ -3,6 +3,7 @@ import unittest
 import math
 from Queue import PriorityQueue
 
+
 class Board(object):
 
     def __init__(self, board, moves_to_reach, previous_node):
@@ -53,7 +54,7 @@ class Board(object):
         new = [[0 for x in range(self.N)] for x in range(self.N)]
         for i in range(0, self.N):
             for j in range(0, self.N):
-                new[i][j] = self.board[i][j]
+                new[i][j] = int(self.board[i][j])
         return new
 
     def find_neighbours(self):
@@ -103,18 +104,31 @@ class Board(object):
                     if neighbours[i] != current.previous_node.board:
                         neighbours[i] = Board(neighbours[i], moves_to_reach=moves, previous_node=current)
                         queue.put((neighbours[i].manhattan(moves=moves), neighbours[i]))
+        return current
 
-        return current.moves_to_reach
+    def solution(self):
+        last_node = self
+        node_trace = []
+        while last_node.previous_node is not None:
+            node_trace = [last_node.board] + node_trace
+            last_node = last_node.previous_node
+        return node_trace
 
 
-with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle14.txt') as f:
+with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle25.txt') as f:
     next(f)
     board = [[float(digit) for digit in line.split()] for line in f]
 
 board = Board(board, moves_to_reach=0, previous_node=None)
 
-print board.solver()
+solve = board.solver()
+print solve.moves_to_reach
 
+solution = solve.solution()
+for row in solution:
+    for r in row:
+        print r
+    print
 
 class EightPuzzle(unittest.TestCase):
 
@@ -154,5 +168,5 @@ class EightPuzzle(unittest.TestCase):
         self.assertEqual(3, queue.qsize())
 
     def test_solver_correct_number_of_moves(self):
-        moves = self.board.solver()
+        moves = self.board.solver().moves_to_reach
         self.assertEqual(25, moves)
