@@ -2,8 +2,8 @@ import numpy as np
 import unittest
 import math
 from Queue import PriorityQueue
-from threading import Thread
-
+import thread
+import sys
 
 class Board(object):
 
@@ -98,27 +98,24 @@ class Board(object):
             twin_board[0][1] = temp_block_1
         twin_board = Board(twin_board, moves_to_reach=0, previous_node=None)
 
-        def func1():
-            t1.daemon = False
+        def func1(q):
             twin_board.solver()
-            t1.daemon = True
             print "Board is not solvable"
-            return False
+            sys.stdout.flush()
+            q.put(False)
 
-        def func2():
-            t1.daemon = False
+
+        def func2(q):
             board.solver()
             print "Board is solvable"
-            return True
+            sys.stdout.flush()
+            q.put(True)
 
-        t1 = Thread(target = func1)
-        t2 = Thread(target = func2)
-        answer1 = t1.start()
-        t2.start()
-        if answer1 is not None:
-            return False
-        else:
-            return True
+        thread_q = PriorityQueue()
+        thread.start_new_thread(func1, (thread_q, ))
+        thread.start_new_thread(func2, (thread_q, ))
+        solution_possible = thread_q.get()
+        return solution_possible
 
     def solver(self):
 
@@ -152,9 +149,9 @@ class Board(object):
         return node_trace
 
 
-with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle2x2-unsolvable1.txt') as f:
+with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle07.txt') as f:
     next(f)
-    board = [[float(digit) for digit in line.split()] for line in f]
+    board = [[float(digit) for digit in line.split()] for line in f if line if line.strip()]
 
 board = Board(board, moves_to_reach=0, previous_node=None)
 
