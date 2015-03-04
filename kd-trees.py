@@ -39,12 +39,14 @@ class PointSet(object):
         self.point_set = point_set
 
     def is_empty(self):
+        '''checks if the set is empty and returns boolean'''
         if len(self.point_set) == 0:
             return True
         else:
             return False
 
     def size(self):
+        '''returns the number of points in the set'''
         return len(self.point_set)
 
     def draw(self):
@@ -58,6 +60,15 @@ class PointSet(object):
         plt.axis([0, 1, 0, 1])
         plt.show()
 
+    def insert(self, new_point):
+        '''inserts a points into the set if it is not already present'''
+        for point in self.point_set:
+            if new_point.x == point.x and new_point.y == point.y:
+                return False
+        self.point_set.append(new_point)
+        return True
+
+
 
 with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
     point_array = [[float(digit) for digit in line.split()] for line in f]
@@ -66,7 +77,7 @@ with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
 point_obj = PointSet(point_array)
 
 # draw all points
-point_obj.draw()
+#point_obj.draw()
 
 
 class CollinearPoints(unittest.TestCase):
@@ -104,4 +115,20 @@ class CollinearPoints(unittest.TestCase):
     def test_size(self):
         point_array = [[1, 2], [3, 4]]
         point_obj = PointSet(point_array)
+        self.assertEqual(2, point_obj.size())
+
+    def test_insert_on_unique(self):
+        point_array = [[1, 2], [3, 4]]
+        point_obj = PointSet(point_array)
+        new_point = Point2D(1, 6)
+        added = point_obj.insert(new_point)
+        self.assertTrue(added)
+        self.assertEqual(3, point_obj.size())
+
+    def test_insert_on_duplicate(self):
+        point_array = [[1, 2], [3, 4]]
+        point_obj = PointSet(point_array)
+        new_point = Point2D(1, 2)
+        added = point_obj.insert(new_point)
+        self.assertEqual(False, added)
         self.assertEqual(2, point_obj.size())
