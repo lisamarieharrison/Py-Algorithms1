@@ -44,6 +44,9 @@ class PointSet(object):
         else:
             return False
 
+    def size(self):
+        return len(self.point_set)
+
 def draw(point_list):
     '''draw all points in the point list'''
     x = []
@@ -97,3 +100,8 @@ class CollinearPoints(unittest.TestCase):
         point_array = [[1, 2], [3, 4]]
         point_obj = PointSet(point_array)
         self.assertEqual(False, point_obj.is_empty())
+
+    def test_size(self):
+        point_array = [[1, 2], [3, 4]]
+        point_obj = PointSet(point_array)
+        self.assertEqual(2, point_obj.size())
