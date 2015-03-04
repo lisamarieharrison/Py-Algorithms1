@@ -1,4 +1,5 @@
 import unittest
+import matplotlib.pyplot as plt
 
 
 class Point2D(object):
@@ -29,16 +30,28 @@ class Point2D(object):
             return False
 
 
+def draw(point_list):
+    '''draw all points in the point list'''
+    x = []
+    y = []
+    for p in point_list:
+        x.append(p.x)
+        y.append(p.y)
+    plt.plot(x, y, 'ro')
+    plt.axis([0, 1, 0, 1])
+    plt.show()
+
+
 with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
     point_array = [[float(digit) for digit in line.split()] for line in f]
 
-print len(point_array)
+# turn points into point objects
+point_obj = []
+for point in point_array:
+    point_obj.append(Point2D(point[0], point[1]))
 
-#
-# for i in p:
-#     min_point.append([find_first(point_collection, i)])
-#     max_point.append([find_last(point_collection, i)])
-# draw_to(min_point, max_point, point_array)
+# draw all points
+draw(point_obj)
 
 
 class CollinearPoints(unittest.TestCase):
