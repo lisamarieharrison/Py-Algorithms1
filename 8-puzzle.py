@@ -149,9 +149,11 @@ class Board(object):
         return node_trace
 
 
-with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle07.txt') as f:
-    next(f)
-    board = [[float(digit) for digit in line.split()] for line in f if line if line.strip()]
+# with open('C:/Users/Lisa/Documents/code/8puzzle/puzzle4x4-hard1.txt') as f:
+#     next(f)
+#     board = [[float(digit) for digit in line.split()] for line in f if line if line.strip()]
+
+board = [[0, 2], [3, 1]]
 
 board = Board(board, moves_to_reach=0, previous_node=None)
 
@@ -165,6 +167,7 @@ if solvable:
         for r in row:
             print r
         print
+
 
 class EightPuzzle(unittest.TestCase):
 
