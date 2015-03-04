@@ -30,11 +30,25 @@ class Point2D(object):
             return False
 
 
+class PointSet(object):
+
+    def __init__(self, points):
+        point_set = []
+        for point in points:
+            point_set.append(Point2D(point[0], point[1]))
+        self.point_set = point_set
+
+    def is_empty(self):
+        if len(self.point_set) == 0:
+            return True
+        else:
+            return False
+
 def draw(point_list):
     '''draw all points in the point list'''
     x = []
     y = []
-    for p in point_list:
+    for p in point_list.point_set:
         x.append(p.x)
         y.append(p.y)
     plt.plot(x, y, 'ro')
@@ -46,12 +60,10 @@ with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
     point_array = [[float(digit) for digit in line.split()] for line in f]
 
 # turn points into point objects
-point_obj = []
-for point in point_array:
-    point_obj.append(Point2D(point[0], point[1]))
+point_obj = PointSet(point_array)
 
 # draw all points
-draw(point_obj)
+# draw(point_obj)
 
 
 class CollinearPoints(unittest.TestCase):
@@ -75,3 +87,13 @@ class CollinearPoints(unittest.TestCase):
         point1 = Point2D(x=0, y=0)
         point2 = Point2D(x=0, y=0.5)
         self.assertEqual(False, point2.equals(point1))
+
+    def test_is_empty_on_true(self):
+        point_array = []
+        point_obj = PointSet(point_array)
+        self.assertTrue(point_obj.is_empty())
+
+    def test_is_empty_on_false(self):
+        point_array = [[1, 2], [3, 4]]
+        point_obj = PointSet(point_array)
+        self.assertEqual(False, point_obj.is_empty())
