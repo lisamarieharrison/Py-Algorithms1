@@ -29,6 +29,61 @@ class Point2D(object):
         else:
             return False
 
+RED = True
+BLACK = False
+
+class Node(object):
+
+    def __init__(self, key, val, colour=None):
+        self.key = key
+        self.val = val
+        self.left = None
+        self.right = None
+        self.colour = colour
+
+    def is_red(self):
+        if self.colour is None or self.colour is BLACK:
+            return False  # null links are black
+        else:
+            self.colour = RED
+            return True
+
+    def rotate_left(self):
+        x = self.right
+        self.right = x.left
+        x.left = self
+        x.colour = self.colour
+        self.colour = RED
+        return x
+
+    def rotate_right(self):
+        x = self.left
+        self.left = x.right
+        x.right = self
+        x.colour = self.colour
+        self.colour = RED
+        return x
+
+    def flip_colours(self):
+        self.colour = RED
+        self.left.colour = BLACK
+        self.right.colour = BLACK
+
+    def compare_to(self, h):
+        return self.key - h.key
+
+
+class RBT(Node):
+
+    def put(self, h, key, val):
+        if h is None:
+            return Node(key=key, val=val, colour=RED)
+        else:
+            cmp = key - h.key
+            if cmp < 0:
+                h.left = put(h.left, key, val)
+
+
 
 class PointSet(object):
 
