@@ -47,16 +47,16 @@ class PointSet(object):
     def size(self):
         return len(self.point_set)
 
-def draw(point_list):
-    '''draw all points in the point list'''
-    x = []
-    y = []
-    for p in point_list.point_set:
-        x.append(p.x)
-        y.append(p.y)
-    plt.plot(x, y, 'ro')
-    plt.axis([0, 1, 0, 1])
-    plt.show()
+    def draw(self):
+        '''draw all points in the point list'''
+        x = []
+        y = []
+        for p in self.point_set:
+            x.append(p.x)
+            y.append(p.y)
+        plt.plot(x, y, 'ro')
+        plt.axis([0, 1, 0, 1])
+        plt.show()
 
 
 with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
@@ -66,7 +66,7 @@ with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
 point_obj = PointSet(point_array)
 
 # draw all points
-# draw(point_obj)
+point_obj.draw()
 
 
 class CollinearPoints(unittest.TestCase):
