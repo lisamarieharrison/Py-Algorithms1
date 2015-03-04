@@ -21,6 +21,14 @@ class Point2D(object):
         sqr_dist = x_dist**2 + y_dist**2
         return sqr_dist
 
+    def equals(self, point2):
+        '''are two points equal?'''
+        if self.x == point2.x and self.y == point2.y:
+            return True
+        else:
+            return False
+
+
 with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
     point_array = [[float(digit) for digit in line.split()] for line in f]
 
@@ -44,3 +52,13 @@ class CollinearPoints(unittest.TestCase):
         point1 = Point2D(x=0, y=0)
         point2 = Point2D(x=0.5, y=0.5)
         self.assertEqual(0.5, point2.distance_squared_to(point1))
+
+    def test_equals_on_true(self):
+        point1 = Point2D(x=0, y=0)
+        point2 = Point2D(x=0, y=0)
+        self.assertTrue(point1.equals(point2))
+
+    def test_equals_on_false(self):
+        point1 = Point2D(x=0, y=0)
+        point2 = Point2D(x=0, y=0.5)
+        self.assertEqual(False, point2.equals(point1))
