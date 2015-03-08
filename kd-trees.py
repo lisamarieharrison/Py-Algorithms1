@@ -32,6 +32,16 @@ class Point2D(object):
 RED = True
 BLACK = False
 
+
+def is_red(node):
+    if node is None:
+        return False # null links are black
+    if node.colour is BLACK:
+        return False
+    else:
+        node.colour = RED
+        return True
+
 class Node(object):
 
     def __init__(self, key, val, colour=None):
@@ -40,13 +50,6 @@ class Node(object):
         self.left = None
         self.right = None
         self.colour = colour
-
-    def is_red(self):
-        if self.colour is None or self.colour is BLACK:
-            return False  # null links are black
-        else:
-            self.colour = RED
-            return True
 
     def rotate_left(self):
         x = self.right
@@ -73,16 +76,26 @@ class Node(object):
         return self.key - h.key
 
 
-class RBT(Node):
+def put(h, key, val):
+    if h is None:
+        return Node(key=key, val=val, colour=RED)
+    else:
+        cmp = key - h.key
+        if cmp < 0:
+            h.left = put(h=h.left, key=key, val=val)
+        elif cmp > 0:
+            h.right = put(h=h.right, key=key, val=val)
+        elif cmp == 0:
+            h.val = val
 
-    def put(self, h, key, val):
-        if h is None:
-            return Node(key=key, val=val, colour=RED)
-        else:
-            cmp = key - h.key
-            if cmp < 0:
-                h.left = put(h.left, key, val)
+    if is_red(h.right) and not is_red(h.left):
+        h = h.rotate_left()
+    if is_red(h.left) and is_red(h.left.left):
+        h = h.rotate_right()
+    if is_red(h.left) and is_red(h.right):
+        h.flip_colours()
 
+    return h
 
 
 class PointSet(object):
@@ -187,3 +200,15 @@ class CollinearPoints(unittest.TestCase):
         added = point_obj.insert(new_point)
         self.assertEqual(False, added)
         self.assertEqual(2, point_obj.size())
+
+    def test_rbt_insert_key(self):
+        start = put(h=None, key=1, val="1")
+        second = put(h=start, key=2, val="2")
+        third = put(h=second, key=1.5, val="3")
+        self.assertEqual([1.5, 1, 2], [third.key, third.left.key, third.right.key])
+
+    def test_rbt_insert_colour(self):
+        start = put(h=None, key=1, val="1")
+        second = put(h=start, key=2, val="2")
+        third = put(h=second, key=1.5, val="3")
+        self.assertEqual([True, False, False], [third.colour, third.left.colour, third.right.colour])
