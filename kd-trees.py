@@ -98,44 +98,120 @@ def put(h, key, val):
     return h
 
 
+class KdTree(object):
+
+    def __init__(self, root=None):
+        self.root = root
+        self.current = self.root
+        self.level = 1
+        self.size = 0
+
+    def insert(self, node):
+
+        if self.root is None:
+            self.root = node
+            self.current = self.root
+            self.size += 1
+            return True
+
+        if self.current.key == node.key:
+            print "Error: Point already in set"
+            return False
+
+        if self.level % 2 == 0:
+            if node.key[1] < self.current.key[1]:
+                if self.current.left is None:
+                    self.current.left = node
+                    self.level = 1
+                    self.size += 1
+                    return True
+                else:
+                    self.current = self.current.left
+                    self.level += 1
+                    self.insert(node)
+            else:
+                if self.current.right is None:
+                    self.current.right = node
+                    self.level = 1
+                    self.size += 1
+                    return True
+                else:
+                    self.current = self.current.right
+                    self.level += 1
+                    self.insert(node)
+        else:
+            if node.key[0] < self.current.key[0]:
+                if self.current.left is None:
+                    self.current.left = node
+                    self.level = 1
+                    self.size += 1
+                    return True
+                else:
+                    self.current = self.current.left
+                    self.level += 1
+                    self.insert(node)
+            else:
+                if self.current.right is None:
+                    self.current.right = node
+                    self.level = 1
+                    self.size += 1
+                    return True
+                else:
+                    self.current = self.current.right
+                    self.level += 1
+                    self.insert(node)
+
+        return True
+
+class KdNode(object):
+
+    def __init__(self, point, left=None, right=None):
+        self.left = left
+        self.right = right
+        self.key = point
+
+
 class PointSet(object):
 
     def __init__(self, points):
-        point_set = []
+        self.points = points
+        self.point_set = KdTree()
         for point in points:
-            point_set.append(Point2D(point[0], point[1]))
-        self.point_set = point_set
+            self.point_set.insert(KdNode(point))
 
     def is_empty(self):
         '''checks if the set is empty and returns boolean'''
-        if len(self.point_set) == 0:
+        if self.point_set.root is None:
             return True
         else:
             return False
 
     def size(self):
         '''returns the number of points in the set'''
-        return len(self.point_set)
+        return self.point_set.size
 
     def draw(self):
         '''draw all points in the point list'''
         x = []
         y = []
-        for p in self.point_set:
-            x.append(p.x)
-            y.append(p.y)
+        current = [self.point_set.root]
+        while len(current) >0:
+            print len(current)
+            node = current[0]
+            x.append(node.key[0])
+            y.append(node.key[1])
+            if node.left is not None:
+                current.append(node.left)
+            if node.right is not None:
+                current.append(node.right)
+            current.pop(0)
         plt.plot(x, y, 'ro')
         plt.axis([0, 1, 0, 1])
         plt.show()
 
     def insert(self, new_point):
         '''inserts a points into the set if it is not already present'''
-        for point in self.point_set:
-            if new_point.x == point.x and new_point.y == point.y:
-                return False
-        self.point_set.append(new_point)
-        return True
-
+        self.point_set.insert(KdNode(new_point))
 
 
 with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
@@ -148,7 +224,7 @@ point_obj = PointSet(point_array)
 #point_obj.draw()
 
 
-class CollinearPoints(unittest.TestCase):
+class KdTrees(unittest.TestCase):
 
     def test_distance_to(self):
         point1 = Point2D(x=0, y=0)
@@ -189,16 +265,16 @@ class CollinearPoints(unittest.TestCase):
         point_array = [[1, 2], [3, 4]]
         point_obj = PointSet(point_array)
         new_point = Point2D(1, 6)
-        added = point_obj.insert(new_point)
+        added = point_obj.point_set.insert(KdNode([new_point.x, new_point.y]))
         self.assertTrue(added)
         self.assertEqual(3, point_obj.size())
 
     def test_insert_on_duplicate(self):
         point_array = [[1, 2], [3, 4]]
         point_obj = PointSet(point_array)
-        new_point = Point2D(1, 2)
-        added = point_obj.insert(new_point)
-        self.assertEqual(False, added)
+        new_point = Point2D(3, 4)
+        added = point_obj.point_set.insert(KdNode([new_point.x, new_point.y]))
+        self.assertTrue(added)
         self.assertEqual(2, point_obj.size())
 
     def test_rbt_insert_key(self):
@@ -212,3 +288,16 @@ class CollinearPoints(unittest.TestCase):
         second = put(h=start, key=2, val="2")
         third = put(h=second, key=1.5, val="3")
         self.assertEqual([True, False, False], [third.colour, third.left.colour, third.right.colour])
+
+    def test_kd_node(self):
+        point_array = [[1, 2], [3, 4]]
+        node = KdNode(point_array[0])
+        self.assertEqual([1, 2], node.key)
+
+    def test_kd_tree_root(self):
+        point_array = [[10, 10], [5, 5], [15, 2], [8, 3]]
+        tree = KdTree()
+        for point in point_array:
+            tree.insert(KdNode(point))
+        self.assertEqual([10, 10], tree.root.key)
+
