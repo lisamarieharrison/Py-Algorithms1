@@ -115,7 +115,6 @@ class KdTree(object):
             return True
 
         if self.current.key == node.key:
-            print "Error: Point already in set"
             return False
 
         if self.level % 2 == 0:
@@ -165,10 +164,11 @@ class KdTree(object):
 
 class KdNode(object):
 
-    def __init__(self, point, left=None, right=None):
+    def __init__(self, point, value, left=None, right=None):
         self.left = left
         self.right = right
         self.key = point
+        self.value = value
 
 
 class PointSet(object):
@@ -177,7 +177,7 @@ class PointSet(object):
         self.points = points
         self.point_set = KdTree()
         for point in points:
-            self.point_set.insert(KdNode(point))
+            self.point_set.insert(KdNode(point, Point2D(point[0], point[1])))
 
     def is_empty(self):
         '''checks if the set is empty and returns boolean'''
@@ -211,8 +211,24 @@ class PointSet(object):
 
     def insert(self, new_point):
         '''inserts a points into the set if it is not already present'''
-        self.point_set.insert(KdNode(new_point))
+        self.point_set.insert(KdNode(new_point, Point2D(new_point[0], new_point[1])))
 
+
+class RectHV(object):
+
+    def __init__(self, xmin, xmax, ymin, ymax):
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+
+    def contains(self, p):
+        '''does this rectangle contain point p?'''
+        return self.xmin <= p.x <= self.xmax and self.ymin <= p.y <= self.ymax
+
+    def intersects(self, rect):
+        '''does this rectangle intersect that rectangle?'''
+        return self.xmax >= rect.xmin and self.ymax >= rect.ymin and rect.xmax >= self.xmin and rect.ymax >= self.ymin
 
 with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
     point_array = [[float(digit) for digit in line.split()] for line in f]
@@ -265,7 +281,7 @@ class KdTrees(unittest.TestCase):
         point_array = [[1, 2], [3, 4]]
         point_obj = PointSet(point_array)
         new_point = Point2D(1, 6)
-        added = point_obj.point_set.insert(KdNode([new_point.x, new_point.y]))
+        added = point_obj.point_set.insert(KdNode([new_point.x, new_point.y], new_point))
         self.assertTrue(added)
         self.assertEqual(3, point_obj.size())
 
@@ -273,7 +289,7 @@ class KdTrees(unittest.TestCase):
         point_array = [[1, 2], [3, 4]]
         point_obj = PointSet(point_array)
         new_point = Point2D(3, 4)
-        added = point_obj.point_set.insert(KdNode([new_point.x, new_point.y]))
+        added = point_obj.point_set.insert(KdNode([new_point.x, new_point.y], new_point))
         self.assertTrue(added)
         self.assertEqual(2, point_obj.size())
 
@@ -291,13 +307,32 @@ class KdTrees(unittest.TestCase):
 
     def test_kd_node(self):
         point_array = [[1, 2], [3, 4]]
-        node = KdNode(point_array[0])
+        node = KdNode(point_array[0], Point2D(point_array[0][0], point_array[0][1]))
         self.assertEqual([1, 2], node.key)
 
     def test_kd_tree_root(self):
         point_array = [[10, 10], [5, 5], [15, 2], [8, 3]]
         tree = KdTree()
         for point in point_array:
-            tree.insert(KdNode(point))
+            tree.insert(KdNode(point, Point2D(point[0], point[1])))
         self.assertEqual([10, 10], tree.root.key)
 
+    def test_RectHV_contains_on_True(self):
+        rect = RectHV(0, 5, 3, 6)
+        p = Point2D(1, 4)
+        self.assertTrue(rect.contains(p))
+
+    def test_RectHV_contains_on_False(self):
+        rect = RectHV(0, 5, 3, 6)
+        p = Point2D(10, 4)
+        self.assertTrue(not rect.contains(p))
+
+    def test_RectHV_intersects_on_True(self):
+        rect = RectHV(2, 10, 5, 10)
+        rect2 = RectHV(7, 10, 4, 6)
+        self.assertTrue(rect.intersects(rect2))
+
+    def test_RectHV_intersects_on_False(self):
+        rect = RectHV(2, 10, 5, 10)
+        rect2 = RectHV(15, 20, 4, 6)
+        self.assertTrue(not rect.intersects(rect2))
