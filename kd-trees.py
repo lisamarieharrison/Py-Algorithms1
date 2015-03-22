@@ -110,6 +110,7 @@ class KdTree(object):
 
         if self.root is None:
             self.root = node
+            self.root.depth = 1
             self.current = self.root
             self.size += 1
             return True
@@ -123,6 +124,8 @@ class KdTree(object):
                     self.current.left = node
                     self.level = 1
                     self.size += 1
+                    self.current.left.depth = self.current.depth + 1
+                    self.current = self.root
                     return True
                 else:
                     self.current = self.current.left
@@ -133,6 +136,8 @@ class KdTree(object):
                     self.current.right = node
                     self.level = 1
                     self.size += 1
+                    self.current.right.depth = self.current.depth + 1
+                    self.current = self.root
                     return True
                 else:
                     self.current = self.current.right
@@ -144,6 +149,8 @@ class KdTree(object):
                     self.current.left = node
                     self.level = 1
                     self.size += 1
+                    self.current.left.depth = self.current.depth + 1
+                    self.current = self.root
                     return True
                 else:
                     self.current = self.current.left
@@ -154,6 +161,8 @@ class KdTree(object):
                     self.current.right = node
                     self.level = 1
                     self.size += 1
+                    self.current.right.depth = self.current.depth + 1
+                    self.current = self.root
                     return True
                 else:
                     self.current = self.current.right
@@ -164,11 +173,12 @@ class KdTree(object):
 
 class KdNode(object):
 
-    def __init__(self, point, value, left=None, right=None):
+    def __init__(self, point, value, left=None, right=None, depth=None):
         self.left = left
         self.right = right
         self.key = point
         self.value = value
+        self.depth = depth
 
 
 class PointSet(object):
@@ -196,7 +206,6 @@ class PointSet(object):
         y = []
         current = [self.point_set.root]
         while len(current) >0:
-            print len(current)
             node = current[0]
             x.append(node.key[0])
             y.append(node.key[1])
@@ -212,6 +221,30 @@ class PointSet(object):
     def insert(self, new_point):
         '''inserts a points into the set if it is not already present'''
         self.point_set.insert(KdNode(new_point, Point2D(new_point[0], new_point[1])))
+
+    def range(self, rect):
+        '''return all points within the rectangle'''
+        current = [self.point_set.root]
+        points_in_rect = []
+        while len(current) > 0:
+            node = current[0]
+            current.pop(0)
+            if rect.contains(node.value):
+                points_in_rect.append(node.value)
+            if node.depth % 2 == 0:
+                rectangle1 = RectHV(0, 1, 0, node.key[1])
+                rectangle2 = RectHV(0, 1, node.key[1], 1)
+            else:
+                rectangle1 = RectHV(0, node.key[0], 0, 1)
+                rectangle2 = RectHV(node.key[0], 1, 0, 1)
+            if rect.intersects(rectangle1):
+                if node.left is not None:
+                    current.append(node.left)
+            if rect.intersects(rectangle2):
+                if node.right is not None:
+                    current.append(node.right)
+        return points_in_rect
+
 
 
 class RectHV(object):
@@ -229,12 +262,12 @@ class RectHV(object):
     def intersects(self, rect):
         '''does this rectangle intersect that rectangle?'''
         return self.xmax >= rect.xmin and self.ymax >= rect.ymin and rect.xmax >= self.xmin and rect.ymax >= self.ymin
-
-with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
-    point_array = [[float(digit) for digit in line.split()] for line in f]
-
-# turn points into point objects
-point_obj = PointSet(point_array)
+#
+# with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
+#     point_array = [[float(digit) for digit in line.split()] for line in f]
+#
+# # turn points into point objects
+# point_obj = PointSet(point_array)
 
 # draw all points
 #point_obj.draw()
@@ -336,3 +369,17 @@ class KdTrees(unittest.TestCase):
         rect = RectHV(2, 10, 5, 10)
         rect2 = RectHV(15, 20, 4, 6)
         self.assertTrue(not rect.intersects(rect2))
+
+    def test_range_1_point(self):
+        point_array = [[0.5, 0.7], [0.2, 0.8], [0.6, 0.4], [0.2, 0.2]]
+        point_obj = PointSet(point_array)
+        rect = RectHV(0.6, 1, 0.2, 0.5)
+        points_in_rect = point_obj.range(rect)
+        self.assertEqual([0.6, 0.4], [points_in_rect[0].x, points_in_rect[0].y])
+
+    def test_range_2_points(self):
+        point_array = [[0.5, 0.7], [0.2, 0.8], [0.6, 0.4], [0.2, 0.2], [0.5, 0.1], [0.4, 0.9], [0.7, 0.6]]
+        point_obj = PointSet(point_array)
+        rect = RectHV(0.4, 0.8, 0, 0.5)
+        points_in_rect = point_obj.range(rect)
+        self.assertEqual([0.6, 0.4, 0.5, 0.1], [points_in_rect[0].x, points_in_rect[0].y, points_in_rect[1].x, points_in_rect[1].y])
