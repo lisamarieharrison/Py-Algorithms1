@@ -246,7 +246,6 @@ class PointSet(object):
         return points_in_rect
 
 
-
 class RectHV(object):
 
     def __init__(self, xmin, xmax, ymin, ymax):
@@ -262,16 +261,39 @@ class RectHV(object):
     def intersects(self, rect):
         '''does this rectangle intersect that rectangle?'''
         return self.xmax >= rect.xmin and self.ymax >= rect.ymin and rect.xmax >= self.xmin and rect.ymax >= self.ymin
-#
-# with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
-#     point_array = [[float(digit) for digit in line.split()] for line in f]
-#
-# # turn points into point objects
-# point_obj = PointSet(point_array)
+
+    def draw(self, point_obj):
+        '''draw all points in the point list and rectangle'''
+        x = []
+        y = []
+        current = [point_obj.point_set.root]
+        while len(current) > 0:
+            node = current[0]
+            x.append(node.key[0])
+            y.append(node.key[1])
+            if node.left is not None:
+                current.append(node.left)
+            if node.right is not None:
+                current.append(node.right)
+            current.pop(0)
+        plt.plot(x, y, 'ro', [self.xmin, self.xmax],
+                 [self.ymax, self.ymax], [self.xmax, self.xmax], [self.ymin, self.ymax], 'b-')
+        plt.axis([0, 1, 0, 1])
+        plt.show()
+
+with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
+    point_array = [[float(digit) for digit in line.split()] for line in f]
+
+# turn points into point objects
+point_obj = PointSet(point_array)
 
 # draw all points
-#point_obj.draw()
+point_obj.draw()
 
+# find points in rectangle
+rect = RectHV(0, 0.1, 0, 0.1)
+return_points = point_obj.range(rect=rect)
+rect.draw(point_obj)
 
 class KdTrees(unittest.TestCase):
 
