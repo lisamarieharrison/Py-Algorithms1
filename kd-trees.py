@@ -287,6 +287,8 @@ class PointSet(object):
         champion = self.handle_node(query, most_promising_child, champion)
 
         # now consider whether we need to look at the other child node, or whether there's no point
+        if least_promising_child is None:
+            return champion
 
         if least_promising_child.check_if_possibly_closer(current, query, champion):
             champion = self.handle_node(query, least_promising_child, champion)
@@ -344,7 +346,7 @@ return_points = point_obj.range(rect=rect)
 # rect.draw(point_obj)
 
 # nearest neighbour search
-closest_point = point_obj.handle_node(query=Point2D(0.5, 0.5))
+closest_point = point_obj.handle_node(query=Point2D(0.3, 0.5))
 print closest_point.key
 
 
