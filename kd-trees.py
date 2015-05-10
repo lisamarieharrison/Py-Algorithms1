@@ -1,7 +1,6 @@
 import unittest
 import matplotlib.pyplot as plt
 
-
 class Point2D(object):
 
     def __init__(self, x, y):
@@ -180,6 +179,18 @@ class KdNode(object):
         self.value = value
         self.depth = depth
 
+    def check_if_possibly_closer(self, current, query, champion):
+
+        if current.depth % 2 == 0:
+            if current.value.distance_to(Point2D(current.key[0], query.y)) <= champion.value.distance_to(query):
+                return True
+            else:
+                return False
+        else:
+            if current.value.distance_to(Point2D(query.x, current.key[1])) <= champion.value.distance_to(query):
+                return True
+            else:
+                return False
 
 class PointSet(object):
 
@@ -245,6 +256,43 @@ class PointSet(object):
                     current.append(node.right)
         return points_in_rect
 
+    def handle_node(self, query, current=None, champion=None):
+
+        if current is None:
+            current = self.point_set.root  # start at root
+            champion = current  # closest known point will be the first point
+        else:
+            if current.value.distance_to(query) < champion.value.distance_to(query):
+                champion = current
+
+        if current.depth % 2 == 0:
+            if query.y > current.key[1]:
+                most_promising_child = current.right
+            else:
+                most_promising_child = current.left
+        else:
+            if query.x > current.key[0]:
+                most_promising_child = current.right
+            else:
+                most_promising_child = current.left
+
+        if most_promising_child == current.left:
+            least_promising_child = current.right
+        else:
+            least_promising_child = current.left
+
+        if most_promising_child is None:
+            return champion
+
+        champion = self.handle_node(query, most_promising_child, champion)
+
+        # now consider whether we need to look at the other child node, or whether there's no point
+
+        if least_promising_child.check_if_possibly_closer(current, query, champion):
+            champion = self.handle_node(query, least_promising_child, champion)
+
+        return champion
+
 
 class RectHV(object):
 
@@ -288,12 +336,17 @@ with open('C:/Users/Lisa/Documents/code/kdtree/input10K.txt') as f:
 point_obj = PointSet(point_array)
 
 # draw all points
-point_obj.draw()
+# point_obj.draw()
 
-# find points in rectangle
+# rectangle range search
 rect = RectHV(0, 0.1, 0, 0.1)
 return_points = point_obj.range(rect=rect)
-rect.draw(point_obj)
+# rect.draw(point_obj)
+
+# nearest neighbour search
+closest_point = point_obj.handle_node(query=Point2D(0.5, 0.5))
+print closest_point.key
+
 
 class KdTrees(unittest.TestCase):
 
